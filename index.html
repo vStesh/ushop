@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Ushop by Vladimir Steshenko</title>
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="preconnect" href="https://fonts.gstatic.com">
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Poppins&family=Karla&family=Nanum+Gothic" rel="stylesheet">
+	<link href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" rel="stylesheet">
+</head>
+
+<body>
+	<header>
+		<div class="top-container ">
+			
+			<div class="row align-center space-between">
+				<div class="logo"><a href="/">MEGASHOP</a></div>
+				<div class="nav">
+					<ul>
+						<li id="menu-catalog">Каталог</li>
+						<li id="menu-buy">Как купить</li>
+						<li id="menu-about">О нас</li>
+						<li id="menu-contacts">Контакты</li>
+					</ul>
+				</div>
+			</div>
+			<div class="row align-center flex-end">
+				<div></div>
+				<form action="" class="form-search">
+					<input type="text" class="input-search" placeholder="Поиск товара">
+					<i class="fas fa-search"></i>
+				</form>
+				<div class="top-phone">099-499-499-6, 096-499-499-6</div>
+			</div>
+		</div>
+	</header>
+	<main>
+		<div class="shopping-cart" id="shopping-cart" onclick="showCart()" title="Показать корзину"><i class="fas fa-shopping-cart"></i><div class="shopping-cart__count" id="shopping-cart-count"></div></div>
+		<div class="shopping-cart-list" id="shopping-cart-list"></div>
+		<div class="container main" id="main">
+			
+		</div>
+	</main>
+	<footer>
+		<div class="bottom-container align-center space-between">
+			<div class="copyright">
+				&copy; 2021 - Megashop
+			</div>
+			<div class="contacts">тел. 099-499-499-6, 096-499-499-6</div>
+		</div>
+	</footer>
+
+	<script src="js/data.js"></script>
+	<script src="js/script.js"></script>
+</body>
+
+</html>
