@@ -255,6 +255,31 @@ ul {
 .shopping-cart-list__item_quantity {
 	width: 35px;
 }
+.shopping-cart-list__item_change {
+	display: flex;
+	width: 100%;
+
+}
+.shopping-cart-list__item_change div {
+	text-align: center;
+	color: white;
+	font-weight: bold;
+	cursor: default;
+}
+.shopping-cart-list__item_change div:first-of-type {
+	background-color:rgba(255, 0, 0, 0.664);
+	width: 50%;
+}
+.shopping-cart-list__item_change div:last-of-type {
+	background-color:rgba(0, 128, 0, 0.651);
+	width: 50%;
+}
+.shopping-cart-list__item_delete {
+	color: red;
+	font-size: 14px;
+	font-weight: bold;
+	cursor: pointer;
+}
 .shopping-cart-list__remove {
 	cursor: pointer;
 	color:rgb(185, 24, 32);
@@ -313,6 +338,11 @@ ul {
 .product-list__block {
 	position: relative;
 	width: 33%;
+	min-height: 425px;
+}
+.product-list__block_line {
+	position: relative;
+	width: 100%;
 	min-height: 425px;
 }
 .product-list__item {
@@ -504,9 +534,8 @@ ul {
 	color: var(--btn-bg-color);
 	cursor: default;
 }
-.create-message {
+.message__top {
 	width: 200px;
-	/* height: 70px; */
 	border: var(--border-size) solid var(--border-color);
 	position: fixed;
 	top: -80px;
@@ -516,17 +545,52 @@ ul {
 	border-radius: 5px;
 	padding: 10px;
 	font-size: 14px;
+	
 }
-.show-message {
-	top: 20px;
-	transition: 0.5s;
+.message__top_create {
+	top: -80px;
+	right: 50px;
+	transition: 1.5s;
 }
-.show-message__success {
+.message__top_show {
+	
+	transition: 0.2s;
+	top: 10px;
+	right: 50px;
+	z-index: 9990;
+}
+.message__top_z-out {
+	z-index: 7000;
+	transition: 3s;
+}
+.message__top_hide {
+	top: 10px;
+	right: -300px;
+	transition: 1s;
+	z-index: 6900;
+
+}
+.message__success {
 	background-color: rgb(61, 163, 61);
 	color: white;
 	font-weight: bold;
 }
-.show-message i {
+.message__warning {
+	background-color: var(--btn-notify-bg-color);
+	color: white;
+	font-weight: bold;
+}
+.message__likes {
+	background-color: rgb(37, 39, 161);
+	color: white;
+	font-weight: bold;
+}
+.message__error {
+	background-color: rgb(230, 10, 10);
+	color: white;
+	font-weight: bold;
+}
+.message__top i {
 	font-size: 34px;
 	padding-right: 10px;
 }

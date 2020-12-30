@@ -1,3 +1,4 @@
+
 let product_list = document.getElementById('product-list');
 let main = document.getElementById('main');
 let cart = {
@@ -5,6 +6,20 @@ let cart = {
 	count: 0,
 	total: 0,
 };
+
+let view = {
+	current: 'line',
+	line() {
+		this.current = 'line';
+		//changeViev('line');
+		showCatalog(catalog);
+	},
+	tile() {
+		this.current = 'tile';
+		//changeViev('tile');
+		showCatalog(catalog);
+	},
+}
 let slider = {};
 let events = [];
 
@@ -110,7 +125,7 @@ function getRowSettings(cat) {
 	render += '<div class="content__settings align-center space-between">';
 	render += '<div class="content__settings_count">Найдено ' + cat.count + ' товаров</div>';
 
-	render += '<div class="content__settings_output align-center">Вид:<ul><li><i class="fas fa-bars"></i></li><li><i class="fas fa-th"></i></li></ul></div>';
+	render += '<div class="content__settings_output align-center">Вид:<ul><li onclick="view.line()"><i class="fas fa-bars"></i></li><li onclick="view.tile()"><i class="fas fa-th"></i></li></ul></div>';
 	render += '<div class="content__settings_sorting align-center">Сортировка:';
 	render += '<ul><li>Дорогие</li><li>Дешевые</li><li>По алфавиту</li></ul></div>';
 	render += '</div>';
@@ -133,8 +148,40 @@ function getProductList(cat) {
 }
 
 function addProductItem(item) {
+	if(view.current == 'line') {
+		return addProductItem_line(item);
+	}
+	return addProductItem_tile(item);
+}
+function addProductItem_tile(item) {
 	let render = '';
 	render += '<div class="product-list__block"><div class="product-list__item"><div class="card">';
+	if(settings.images.slider && (item.images.length > 1)) {
+		render += '<div class="card__img">';
+		render += getSliderImages(item);
+		events.push({id: 'left-' + item.id, number: -1});
+		events.push({id: 'right-' + item.id, number: +1});
+		render += '</div>';
+	} else {
+		render += '<div class="card__img"><img src="assets/images/'+ item.images[0] +'" alt=""></div>';
+	}
+	render += '<div class="card__brand">' + item.brand + '</div>';
+	render += '<div class="card__price">' + getAvailable(item) + new Intl.NumberFormat('ru-RU').format(item.price) + '</div>';
+	render += '<div class="card__title">' + item.name + '</div>';
+	render += '<div class="card__footer"><div class="card__footer-button card__footer-like" onclick="addToWishlist(' + item.id + ')"><i class="fas fa-heart"></i><span>Нравится</span></div>';
+	if(item.quantity > 0) {
+		render += '<div class="card__footer-button card__footer-buy" onclick="addToCart(' + item.id + ')"><i class="fas fa-cart-plus"></i><span>В корзину</span></div></div></div>';
+	} else {
+		render += '<div class="card__footer-button card__footer-notify" onclick="addToNotify(' + item.id + ')"><i class="fas fa-envelope"></i><span>Уведомить</span></div></div></div>';
+	}
+	
+	render += '<div class="card__description">' + item.announcement + '</div>';
+	render += '</div></div>';
+	return render;
+}
+function addProductItem_line(item) {
+	let render = '';
+	render += '<div class="product-list__block_line"><div class="product-list__item"><div class="card">';
 	if(settings.images.slider && (item.images.length > 1)) {
 		render += '<div class="card__img">';
 		render += getSliderImages(item);
@@ -260,27 +307,36 @@ function showPage(num) {
 
 function addToCart(div) {
 	let id = div.id;
-	cart.count++;
-	if(id in cart.list) {
-		cart.list[id].quantity++;
-		cart.total += cart.list[id].price;
-		cart.list[id].total += cart.list[id].price;
+	if(getProductAvailable(id)) {
+		cart.count++;
+		if(id in cart.list) {
+			cart.list[id].quantity++;
+			cart.total += cart.list[id].price;
+			cart.list[id].total += cart.list[id].price;
+		} else {
+			cart.list[id] = getProduct(id);
+			cart.total += cart.list[id].price;
+		}
+		localStorage.setItem('cart', JSON.stringify(cart));
+		renderCart();
+		showMessage('success', 'cart-arrow-down', 'Товар добавлен в корзину');
 	} else {
-		cart.list[id] = getProduct(id);
-		cart.total += cart.list[id].price;
+		showMessage('error', 'ban', 'Товара больше нет в наличии');
 	}
-	localStorage.setItem('cart', JSON.stringify(cart));
-	renderCart();
-	showMessage('success', 'cart-arrow-down', 'Товар добавлен в корзину');
+	
 	
 }
 
 function addToWishlist(id) {
-	alert('Товар добавлен в список желаний');
+
+
+	showMessage('likes', 'heart', 'Пополнен список желаний');
 }
 
 function addToNotify(id) {
-	alert('Сообщим как появится в наличии');
+
+
+	showMessage('warning', 'envelope', 'Сообщим, когда товар появится');
 }
 
 // Заполняет из Local Storage содержимое корзины, списка желаний и уведомлений
@@ -297,7 +353,7 @@ function renderCart() {
 	let render = '';
 	render += '<div class="shopping-cart-list__header space-between">';
 	render += '<div class="shopping-cart-list__title">Корзина</div>';
-	render += '<div class="shopping-cart-list__min" title="Минимизировать" onclick="scaleCart()">>*<</div>';
+	//render += '<div class="shopping-cart-list__min" title="Минимизировать" onclick="scaleCart()">>*<</div>';
 	if(document.getElementById('shopping-cart-list').classList.contains('shopping-cart-list_visible')) {
 		render += '<div class="shopping-cart-list__close" onclick="showCart()">Спрятать >></div></div>';
 	} else {
@@ -310,9 +366,11 @@ function renderCart() {
 		for(key in cart.list) {
 			render += '<div class="shopping-cart-list__item row">';
 			render += '<div class="shopping-cart-list__item_name">' + cart.list[key].name + '</div>';
-			render += '<div class="shopping-cart-list__item_quantity">' + cart.list[key].quantity + ' шт</div>';
+			render += '<div class="shopping-cart-list__item_quantity">' + cart.list[key].quantity + ' шт';
+			render += '<div class="shopping-cart-list__item_change"><div onclick="cartItemMinus(' + key + ')" title="Уменьшить количество">-</div><div onclick="cartItemPlus(' + key + ')" title="Увеличить количество">+</div></div></div>';
 			render += '<div class="shopping-cart-list__item_price">' + cart.list[key].price + ' грн</div>';
 			render += '<div class="shopping-cart-list__item_total">' + cart.list[key].total + ' грн</div>';
+			render += '<div class="shopping-cart-list__item_delete" onclick="cartItemRemove(' + key + ')" title="Удалить позицию из корзины">Х</div>';
 			render += '</div>';
 		}
 	} else {
@@ -368,13 +426,70 @@ function removeCart() {
 	document.getElementById('shopping-cart-count').innerHTML = '';
 	renderCart();
 	document.getElementById('shopping-cart-list').classList.remove('shopping-cart-list_visible');
-	alert('Корзина очищена');
+	showMessage('warning', 'exclamation', 'Корзина очищена');
+	
 }
 
 function showMessage(cl, type, text) {
 	let div = document.createElement('div');
-	div.className = 'create-message show-message__' + cl;
+	div.className = 'message__top message__top_create message__' + cl;
 	div.innerHTML = '<i class="fas fa-' + type + ' float-left"></i>' + text;
 	document.body.prepend(div);
-	div.classList.add('show-message');
+	div.classList.remove('message__top_create');
+	setTimeout(() => {div.classList.add('message__top_show')}, 10);
+	setTimeout(() => {div.classList.add('.message__top_z-out')}, 10);
+	setTimeout(() => {div.classList.add('message__top_hide')}, 2000);
+	setTimeout(() => {div.remove()}, 3000);
+	
+}
+
+function cartItemRemove(div) {
+	if(confirm('Удалить позицию из корзины?')) {
+		let id = div.id;
+		cart.total -= cart.list[id].total;
+		cart.count -= cart.list[id].quantity;
+		delete cart.list[id];
+		localStorage.setItem('cart', JSON.stringify(cart));
+		renderCart();
+	}
+	if(cart.total == 0) {
+		removeCart();
+	}
+}
+function cartItemPlus(div) {
+	let id = div.id;
+	if(getProductAvailable(id)) {
+		cart.list[id].quantity++;
+		cart.list[id].total += cart.list[id].price;
+		cart.count++;
+		cart.total += cart.list[id].price;
+	} else {
+		showMessage('error', 'ban', 'Товара больше нет в наличии');
+	}
+	localStorage.setItem('cart', JSON.stringify(cart));
+	renderCart();
+}
+function cartItemMinus(div) {
+	let id = div.id;
+	if(cart.list[id].quantity == 1) {
+		cartItemRemove(div);
+		return;
+	}
+	cart.list[id].quantity--;
+	cart.list[id].total -= cart.list[id].price;
+	cart.total -= cart.list[id].price;
+	cart.count--;
+	localStorage.setItem('cart', JSON.stringify(cart));
+	renderCart();
+}
+
+function getProductAvailable(id) {
+	let key = getProductIndex(id);
+	if(key > -1) {
+		if((id in cart.list) && (data[key].quantity - cart.list[id].quantity) < 1) {
+			return 0;
+		}
+		return 1;
+	}
+	return 0;
 }
