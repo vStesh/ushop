@@ -6,7 +6,7 @@ let settings = {
 
 }
 
-let catalog = {
+let catalog1 = {
 	data: [], // Массив товара изначально пустой
 	count: 0, // Количество товара
 	view: 'tile', // Вид просмотра Черепица
@@ -140,7 +140,7 @@ let data = [
 	},
 	{
 		id			: 'U0430150',
-		name		: '	Наушники Xiaomi Mi Air 2 True Wireless Earphones White',
+		name		: 'Наушники Xiaomi Mi Air 2 True Wireless Earphones White',
 		images		:['U0430150_big.jpg', 'U0430150_2big.jpg', 'U0430150_3big.jpg', 'U0430150_4big.jpg', 'U0430150_5big.jpg'],
 		brand		: 'Xiaomi',
 		announcement: 'тип устройства - гарнитура, Тип - True Wireless Stereo (TWS), подключение - беспроводное, конструкция - вкладыши, интерфейс подключения - Bluetooth, сопротивление наушников - 32 Ом, минимальная воспроизводимая частота - 8 Гц, максимальная воспроизводимая частота - 25 кГц, чувствительность - 120 дБ, 4 часа, цвет - White',

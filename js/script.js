@@ -1,159 +1,291 @@
-
-let product_list = document.getElementById('product-list');
 let main = document.getElementById('main');
-let cart = {
-	list: {},
-	count: 0,
-	total: 0,
-};
 
-let view = {
-	current: 'line',
-	line() {
-		this.current = 'line';
-		//changeViev('line');
-		showCatalog(catalog);
-	},
-	tile() {
-		this.current = 'tile';
-		//changeViev('tile');
-		showCatalog(catalog);
-	},
-}
-let slider = {};
-let events = [];
-
+let catalog = new Catalog(data);
+let siteUrl = 'home';
+let cart = new Cart;
 let notify = [];
 let wishlist = [];
 
-document.getElementById('menu-catalog').addEventListener('click', () => {showCatalog(getCatalog(data))});
-document.getElementById('menu-buy').addEventListener('click', () => {showHowBuy()});
-document.getElementById('menu-about').addEventListener('click', () => {showAbout()});
-document.getElementById('menu-contacts').addEventListener('click', () => {showContacts()});
+let slider = {};
+let events = [];
 
-showHomePage();
+document.getElementById('menu-catalog').addEventListener('click', () => {eShowCatalog()});
+document.getElementById('menu-buy').addEventListener('click', () => {eShowHowBuy()});
+document.getElementById('menu-about').addEventListener('click', () => {eShowAbout()});
+document.getElementById('menu-contacts').addEventListener('click', () => {eShowContacts()});
+
+eShowHomePage();
 getFromStorage();
 
-function showHomePage() {
-	main.innerHTML = 'Главная страница сайта';
+/*
+* Обработка событий Функции eFunctionName
+* Начало
+*/
+
+// Показ Главной страницы
+function eShowHomePage() {
+	this.siteUrl = 'home';
+	main.innerHTML = 'Главная страница сайта<br/><br/><br/>Вы можете выбрать и купить любой товар в каталоге.<br/>Магазин работает в тестовом режиме, поэтому воспользуйтесь меню Каталог, чтобы проверить работоспособность магазина.<br/><br/><br/>Информация на страницах Главная, Как купить, О нас, Контакты указана в ознакомительных целях. Не обращайте внимания на данную информацию.<br/><br/>Спасибо :)';
 }
 
-function showCatalog(cat) {
+// Показ Каталога товара
+function eShowCatalog() {
+	this.siteUrl = 'catalog';
 	events = [];
 	let render = getBreadcrumb([{title: 'Каталог товара', event: false}]);
 	render += '<div class="row">';
 	render += getSidebar();
-	render += getContent(cat);
+	render += getContent();
 	render += '</div>';
 	main.innerHTML = render;
 	addEvent();
+	addFilterEvents();
 }
 
-function showHowBuy() {
+// Показ страницы Как купить
+function eShowHowBuy() {
+	this.siteUrl = 'home';
 	let render = getBreadcrumb([{title: 'Как купить', event: false}]);
-	render += 'Как купить';
+	render += 'Как купить<br/><br/><br/>Вы можете выбрать и купить любой товар в каталоге.<br/>Магазин работает в тестовом режиме, поэтому воспользуйтесь меню Каталог, чтобы проверить работоспособность магазина.<br/><br/><br/>Информация на страницах Главная, Как купить, О нас, Контакты указана в ознакомительных целях. Не обращайте внимания на данную информацию.<br/><br/>Спасибо :)';
 	main.innerHTML = render;
 }
 
-function showAbout() {
+// Показ страницы О магазине
+function eShowAbout() {
+	this.siteUrl = 'home';
 	let render = getBreadcrumb([{title: 'О магазине', event: false}]);
-	render += 'О нас';
+	render += 'О нас<br/><br/><br/>Вы можете выбрать и купить любой товар в каталоге.<br/>Магазин работает в тестовом режиме, поэтому воспользуйтесь меню Каталог, чтобы проверить работоспособность магазина.<br/><br/><br/>Информация на страницах Главная, Как купить, О нас, Контакты указана в ознакомительных целях. Не обращайте внимания на данную информацию.<br/><br/>Спасибо :)';
 	main.innerHTML = render;
 }
 
-function showContacts() {
+// Показ страницы Контактная информация
+function eShowContacts() {
+	this.siteUrl = 'home';
 	let render = getBreadcrumb([{title: 'Контактная информация', event: false}]);
-	render += 'Контакты';
+	render += 'Контакты<br/><br/><br/>Вы можете выбрать и купить любой товар в каталоге.<br/>Магазин работает в тестовом режиме, поэтому воспользуйтесь меню Каталог, чтобы проверить работоспособность магазина.<br/><br/><br/>Информация на страницах Главная, Как купить, О нас, Контакты указана в ознакомительных целях. Не обращайте внимания на данную информацию.<br/><br/>Спасибо :)';
 	main.innerHTML = render;
 }
 
-function showCart() {
-	if(document.getElementById('shopping-cart-list').classList.contains('shopping-cart-list_visible')) {
-		document.getElementById('shopping-cart-list').classList.remove('shopping-cart-list_visible');
-		document.getElementById('shopping-cart-list').classList.remove('shopping-cart-list_scale');
-	} else {
-		document.getElementById('shopping-cart-list').classList.add('shopping-cart-list_visible');
-	}
-	renderCart();
+// Событие показа корзины при наведении на значок корзины
+function eShowCart() {
+	document.getElementById('shopping-cart-list').classList.toggle('shopping-cart-list_visible');
+	cart.render();
+	//renderCart();
 }
 
-function scaleCart() {
-	if(document.getElementById('shopping-cart-list').classList.contains('shopping-cart-list_scale')) {
-		document.getElementById('shopping-cart-list').classList.remove('shopping-cart-list_scale');
-		document.getElementById('shopping-cart-list').addEventListener('click', () => {scaleCart()});
+// Нажатие на кнопку Вид черепица
+function eViewTile() {
+	catalog.view = 'tile';
+	catalog.paginate.current = 1;
+	catalog.getPaginate();
+	eShowCatalog(catalog);
+}
+
+// Нажатие на кнопку Вид строка
+function eViewLine() {
+	catalog.view = 'line';
+	catalog.paginate.current = 1;
+	catalog.getPaginate();
+	eShowCatalog(catalog);
+}
+
+// Сладер фото Влево
+function eSliderTurnLeft(id) {
+	slider[id][0] += slider[id][1] - 1;
+	refreshSlider(id);
+}
+
+// Слайдер фото Вправо
+function eSliderTurnRight(id) {
+	slider[id][0]++;
+	refreshSlider(id);
+}
+
+// Обработка события нажатия на кнопки с номером страницы в строке Пагинации
+function eShowPage(num) {
+	catalog.paginate.current = num;
+	catalog.getPaginateHtml();
+	eShowCatalog(catalog);
+}
+
+// Нажатие на кнопку Добавить в карточке товара
+function eAddToCart(div) {
+	let id = div.id;
+	if(getProductAvailable(id)) {
+		cart.add(id).render();
+		showMessage('success', 'cart-arrow-down', 'Товар добавлен в корзину');
 	} else {
-		document.getElementById('shopping-cart-list').classList.add('shopping-cart-list_scale');
+		showMessage('error', 'ban', 'Товара больше нет в наличии');
 	}
 }
 
+// Нажатие на кнопку Понравился в карточке товара
+function eAddToWishlist(id) {
+
+	showMessage('likes', 'heart', 'Пополнен список желаний');
+}
+
+// Нажатие на кнопку Сообщить о наличии в карточке товара
+function eAddToNotify(id) {
+
+	showMessage('warning', 'envelope', 'Сообщим, когда товар появится');
+}
+
+// Обработка нажатия на кнопку Показать в фильтрах 
+function eApplyFilters(del = false) {
+	catalog.filters.update(document.getElementById('filter-form').elements);
+	if(document.querySelector('.show_menu')) {
+		eHideMenu();
+	}
+	if(del) {
+		catalog.filters.reset();
+	}
+	catalog.applyFilters();
+	catalog.render();
+
+}
+
+function eShowMenu() {
+	let div = document.createElement('div');
+	div.className = 'show_menu';
+	div.id = 'show-menu';
+	let render = '<div class="nav-button" onclick="eHideMenu()"><i class="fas fa-times"></i></div>';
+	render += '<div class="nav__show_menu"><ul><li id="menu-catalog-show">Каталог</li><li id="menu-buy-show">Как купить</li><li id="menu-about-show">О нас</li><li id="menu-contacts-show">Контакты</li></ul></div>';
+	render += '<div id="sidebar-show"></div>';
+	div.innerHTML = render;
+
+	document.body.prepend(div);
+	if(this.siteUrl === 'catalog') {
+	document.querySelector('#sidebar-show').innerHTML = document.querySelector('#sidebar').innerHTML;
+	document.querySelector('#sidebar').innerHTML = '';	
+	addFilterEvents();
+	}
+	
+
+	document.getElementById('menu-catalog-show').addEventListener('click', () => {eHideMenu(); eShowCatalog()});
+	document.getElementById('menu-buy-show').addEventListener('click', () => {eHideMenu(); eShowHowBuy()});
+	document.getElementById('menu-about-show').addEventListener('click', () => {eHideMenu(); eShowAbout()});
+	document.getElementById('menu-contacts-show').addEventListener('click', () => {eHideMenu(); eShowContacts()});
+	// div.classList.remove('message__top_create');
+	// setTimeout(() => {div.classList.add('message__top_show')}, 10);
+	// setTimeout(() => {div.classList.add('.message__top_z-out')}, 10);
+	// setTimeout(() => {div.classList.add('message__top_hide')}, 2000);
+	// setTimeout(() => {div.remove()}, 3000);
+}
+ function eHideMenu() {
+	if(this.siteUrl === 'catalog') {
+		
+		document.querySelector('#sidebar').innerHTML = document.querySelector('#sidebar-show').innerHTML;
+		document.querySelector('#sidebar-show').innerHTML = '';
+		addFilterEvents();
+	}
+	 document.getElementById('show-menu').remove();
+ }
+
+function ePaginate(count) {
+	settings.paginate = count;
+	catalog.paginate.current = 1;
+	catalog.getPaginate();
+	eShowCatalog();
+}
+
+/*
+* Конец
+* Обработка событий Функции eFunctionName
+*/
+
+
+// Рендеринг Строки навигации
 function getBreadcrumb(stack) {
-	let render = '<div class="breadcrumb" id="breadcrumb"><ul><li class="breadcrumb__link" onclick="showHomePage()" title="Перейти на главную"><i class="fas fa-home"></i></li>';
+	let render = '<div class="breadcrumb" id="breadcrumb"><ul><li class="breadcrumb__link" onclick="eShowHomePage()" title="Перейти на главную"><i class="fas fa-home"></i></li>';
 	stack.forEach((item, key, array) => {
 		render += '<li onclick="' + item.event + '">' + item.title + '</li>';
 	});
-	
-
-
 	render += '</ul></div>';
 	return render;
 }
 
+// Рендеринг Сайдбара - фильтров
 function getSidebar() {
 	let render = '';
-	render = '<div class="sidebar"><h3>Фильтра</h3><div class="filters">Тут будут фильтры</div></div>';
+	render = '<div class="sidebar" id="sidebar"><h3>Фильтра</h3><div class="filters" id="filters"><form id="filter-form">';
+	render += '<div class="filter__button_show display-none" type="submit" onclick="eApplyFilters()" id="filter__button_show">Показать</div>';
+	render += '<div class="filter__item" id="filter-price"><div class="filter__item_header">Цена:</div>';
+	render += '<div class="row-min space-between"><div class="filter__item_input">От</div><div class="filter__item_input">До</div></div>'
+	render += '<div class="row-min"><input type="text" class="filter__item_input" name="min-price" value="' + catalog.getFilters('price-min') + '"><input type="text" class="filter__item_input" name="max-price" value="' + catalog.getFilters('price-max') + '"></div></div>'
+	
+	render += '<div class="filter__item" id="filter-available"><div class="filter__item_header">Наличие:</div>';
+	render += '<div class="row-min space-between filter__line"><label for="av-all">Все товары</label><input type="radio" name="available" ' + (catalog.getFilters('available') ? '' : ' checked ') + 'value="all"></div><div class="row-min space-between filter__line"><label for="av-all"  >Только в наличии</label><input type="radio" name="available" ' + (catalog.getFilters('available') ? ' checked ' : '') + ' value="aval"></div></div>'
+	
+	render += '<div class="filter__item" id="filter-brand"><div class="filter__item_header">Бренды:</div>';
+	catalog.brands.forEach((item, key, array) => {
+		render += '<div class="row-min space-between filter__line"><label for="av-all">' + item + '</label><input type="checkbox" name="brand-' + item + '" ' + (catalog.filters.brand.includes(item) ? ' checked ' : '') + '></div>'
+	});
+	render += '</div></form>';
+	if(!catalog.filters.default) {
+		render += '<button class="filter__button_clear" onclick="eApplyFilters(1)">Сбросить фильтра</button>';
+	}
+	render += '</div></div>';
 	return render;
 }
 
-function getContent(cat) {
+function getContent() {
 	let render = '<div class="content">';
-	render += getContentHeader();
-	render += getRowSettings(cat);
-	render += getProductList(cat);
-	render += cat.paginate.html;
+	render += renderContentHeader();
+	render += renderRowSettings();
+	render += renderProductList();
+	catalog.paginate.current = 1;
+	//if(catalog.paginate.count > 1) {
+		render += catalog.paginate.html;
+	//}
+	
 	render += '</div>';
 	return render;
-}
+}//
 
-function getContentHeader() {
-	let render = '<div class="content__header"><h2>Компьютерная техника</h2></div>';
+// Рендеринг заголовка каталога
+function renderContentHeader() {
+	let render = '<div class="content__header"><h2>Каталог товара</h2></div>';
 
 	return render;
 }
 
-function getRowSettings(cat) {
+// Рендеринг строки с настройками вида Каталога
+function renderRowSettings() {
 	let render = '';
-	render += '<div class="content__settings align-center space-between">';
-	render += '<div class="content__settings_count">Найдено ' + cat.count + ' товаров</div>';
+	render += '<div class="content__settings">';
+	render += '<div class="content__settings_count content__settings_item">Найдено ' + catalog.count + ' товаров</div>';
 
-	render += '<div class="content__settings_output align-center">Вид:<ul><li onclick="view.line()"><i class="fas fa-bars"></i></li><li onclick="view.tile()"><i class="fas fa-th"></i></li></ul></div>';
-	render += '<div class="content__settings_sorting align-center">Сортировка:';
-	render += '<ul><li>Дорогие</li><li>Дешевые</li><li>По алфавиту</li></ul></div>';
+	render += '<div class="content__settings_output content__settings_item align-center">Вид:<ul><li class="' + (catalog.view != 'line' ? 'active' : '') + '" onclick="eViewLine()"><i class="fas fa-bars"></i></li><li class="' + (catalog.view != 'tile' ? 'active' : '') + '" onclick="eViewTile()"><i class="fas fa-th"></i></li></ul></div>';
+	render += '<div class="content__settings_sorting content__settings_item align-center">Сортировка:';
+	render += '<ul><li class="' + (catalog.sorting != 'expensive' ? 'active' : '') + '" onclick="catalog.sortingExpensive()">Дорогие</li><li class="' + (catalog.sorting != 'cheap' ? 'active' : '') + '" onclick="catalog.sortingCheap()">Дешевые</li><li class="' + (catalog.sorting != 'abc' ? 'active' : '') + '" onclick="catalog.sortingAbc()">По алфавиту</li></ul></div>';
 	render += '</div>';
 	return render;
 }
 
-function getProductList(cat) {
+// Рендеринг списка товара в зависимости от вида просмотра
+function renderProductList() {
 	let render = '<div class="product-list">';
-	if(cat.paginate) {
-		for(let i = (cat.paginate.current - 1) * cat.paginate.quantity; (i < cat.paginate.current * cat.paginate.quantity) && i < cat.count; i++) {
-			render += addProductItem(cat.data[i]);
+	if(catalog.paginate) {
+		for(let i = (catalog.paginate.current - 1) * catalog.paginate.quantity; (i < catalog.paginate.current * catalog.paginate.quantity) && i < catalog.count; i++) {
+			render += getProductItemRender(catalog.data[i]);
 		}
 	} else {
-		cat.data.forEach((item, key, array) => {
-			render += addProductItem(item);
+		catalog.data.forEach((item, key, array) => {
+			render += getProductItemRender(item);
 		});
 	}
 	render += '</div>';
 	return render;
 }
 
-function addProductItem(item) {
-	if(view.current == 'line') {
-		return addProductItem_line(item);
+function getProductItemRender(item) {
+	if(catalog.view == 'line') {
+		return getProductItemRender_line(item);
 	}
-	return addProductItem_tile(item);
+	return getProductItemRender_tile(item);
 }
-function addProductItem_tile(item) {
+function getProductItemRender_tile(item) {
 	let render = '';
 	render += '<div class="product-list__block"><div class="product-list__item"><div class="card">';
 	if(settings.images.slider && (item.images.length > 1)) {
@@ -168,40 +300,36 @@ function addProductItem_tile(item) {
 	render += '<div class="card__brand">' + item.brand + '</div>';
 	render += '<div class="card__price">' + getAvailable(item) + new Intl.NumberFormat('ru-RU').format(item.price) + '</div>';
 	render += '<div class="card__title">' + item.name + '</div>';
-	render += '<div class="card__footer"><div class="card__footer-button card__footer-like" onclick="addToWishlist(' + item.id + ')"><i class="fas fa-heart"></i><span>Нравится</span></div>';
+	render += '<div class="card__footer"><div class="card__footer-button card__footer-like" onclick="eAddToWishlist(' + item.id + ')"><i class="fas fa-heart"></i><span>Нравится</span></div>';
 	if(item.quantity > 0) {
-		render += '<div class="card__footer-button card__footer-buy" onclick="addToCart(' + item.id + ')"><i class="fas fa-cart-plus"></i><span>В корзину</span></div></div></div>';
+		render += '<div class="card__footer-button card__footer-buy" onclick="eAddToCart(' + item.id + ')"><i class="fas fa-cart-plus"></i><span>В корзину</span></div></div></div>';
 	} else {
-		render += '<div class="card__footer-button card__footer-notify" onclick="addToNotify(' + item.id + ')"><i class="fas fa-envelope"></i><span>Уведомить</span></div></div></div>';
+		render += '<div class="card__footer-button card__footer-notify" onclick="eAddToNotify(' + item.id + ')"><i class="fas fa-envelope"></i><span>Уведомить</span></div></div></div>';
 	}
 	
 	render += '<div class="card__description">' + item.announcement + '</div>';
 	render += '</div></div>';
 	return render;
 }
-function addProductItem_line(item) {
+function getProductItemRender_line(item) {
 	let render = '';
-	render += '<div class="product-list__block_line"><div class="product-list__item"><div class="card">';
-	if(settings.images.slider && (item.images.length > 1)) {
-		render += '<div class="card__img">';
-		render += getSliderImages(item);
-		events.push({id: 'left-' + item.id, number: -1});
-		events.push({id: 'right-' + item.id, number: +1});
-		render += '</div>';
-	} else {
-		render += '<div class="card__img"><img src="assets/images/'+ item.images[0] +'" alt=""></div>';
-	}
-	render += '<div class="card__brand">' + item.brand + '</div>';
-	render += '<div class="card__price">' + getAvailable(item) + new Intl.NumberFormat('ru-RU').format(item.price) + '</div>';
-	render += '<div class="card__title">' + item.name + '</div>';
-	render += '<div class="card__footer"><div class="card__footer-button card__footer-like" onclick="addToWishlist(' + item.id + ')"><i class="fas fa-heart"></i><span>Нравится</span></div>';
+	render += '<div class="product-list__block_line"><div class="product-list__item_line"><div class="card_line" id="' + item.id + '">';
+	render += '<div class="card__img_line"><img src="assets/images/'+ item.images[0] +'" alt=""></div>';
+	render += '<div class="card__body_line">';
+	render += '<div class="card__title_line">' + item.name + '</div>';
+	render += '<div class="card__brand_line">' + getAvailable(item) + item.brand + '</div></div>';
+
+	
+	render += '<div class="card__footer_line">';
+	render += '<div class="card__price_line">'  + new Intl.NumberFormat('ru-RU').format(item.price) + '</div>';
+	render += '<div class="card__footer-button card__footer-button_line card__footer-like" onclick="eAddToWishlist(' + item.id + ')"><i class="fas fa-heart"></i><span>Нравится</span></div>';
 	if(item.quantity > 0) {
-		render += '<div class="card__footer-button card__footer-buy" onclick="addToCart(' + item.id + ')"><i class="fas fa-cart-plus"></i><span>В корзину</span></div></div></div>';
+		render += '<div class="card__footer-button card__footer-button_line card__footer-buy" onclick="eAddToCart(' + item.id + ')"><i class="fas fa-cart-plus"></i><span>В корзину</span></div></div></div>';
 	} else {
-		render += '<div class="card__footer-button card__footer-notify" onclick="addToNotify(' + item.id + ')"><i class="fas fa-envelope"></i><span>Уведомить</span></div></div></div>';
+		render += '<div class="card__footer-button card__footer-button_line card__footer-notify" onclick="eAddToNotify(' + item.id + ')"><i class="fas fa-envelope"></i><span>Уведомить</span></div></div></div>';
 	}
 	
-	render += '<div class="card__description">' + item.announcement + '</div>';
+	//render += '<div class="card__description">' + item.announcement + '</div>';
 	render += '</div></div>';
 	return render;
 }
@@ -220,24 +348,25 @@ function getSliderImages(item) {
 	return render;
 }
 
-function sliderTurnLeft(id) {
-	slider[id][0] += slider[id][1] - 1;
-	refreshSlider(id);
-}
-function sliderTurnRight(id) {
-	slider[id][0]++;
-	refreshSlider(id);
 
-}
 
 function addEvent() {
 	events.forEach((item, key, array) => {
 		if(item.number > 0) {
-			document.getElementById(item.id).addEventListener('click', () => {sliderTurnRight(item.id.substr(6, item.id.length))});
+			document.getElementById(item.id).addEventListener('click', () => {eSliderTurnRight(item.id.substr(6, item.id.length))});
 		} else {
-			document.getElementById(item.id).addEventListener('click', () => {sliderTurnLeft(item.id.substr(5, item.id.length))});
+			document.getElementById(item.id).addEventListener('click', () => {eSliderTurnLeft(item.id.substr(5, item.id.length))});
 		}
 		
+	});
+}
+function addFilterEvents() {
+	// let filters = document.getElementById('filters');
+	document.getElementById('filters').querySelectorAll('input').forEach((item, key, arr) => {
+		item.addEventListener('change', () => {
+			document.getElementById('filter__button_show').classList.remove('display-none');
+			document.getElementById('filter__button_show').classList.add('display-block');
+		});
 	});
 }
 function refreshSlider(id) {
@@ -260,134 +389,14 @@ function getAvailable(item) {
 	return '<div class="card__available card__available_false">нет в наличии</div>';
 }
 
-function getCatalog(arr) {
-	catalog.data = arr;
-
-	catalog.count = catalog.data.length;
-	if(catalog.count > settings.paginate) {
-		catalog.paginate = getPaginate();
-	} else {
-		catalog.paginate = false;
-	}
-	return catalog;
-}
-
-function getPaginate() {
-	let obj = {};
-	//console.log(Math.ceil(catalog.count/ settings.paginate));
-	obj.count = Math.ceil(catalog.count / settings.paginate);
-	obj.html = getPaginateHtml(obj.count);
-	obj.current = 1;
-	obj.quantity = settings.paginate;
-
-	return obj;
-}
-
-function getPaginateHtml(count, current = 1) {
-	let render = '<div class="paginate align-center "><ul>';
-	if(current != 1) {
-		render += '<li onclick="showPage(' + (current - 1) + ')"><<</li>';
-	}
-	for(let i = 1; i < (count + 1); i++) {
-		
-		render += '<li class="' + (i == current ? 'paginate_active' : '') +'" onclick="showPage(' + i + ')">' + i + '</li>';
-	}
-	if(current != count) {
-		render += '<li onclick="showPage(' + (current + 1) + ')">>></li>';
-	}
-	render += '</ul></div>';
-	return render;
-}
-
-function showPage(num) {
-	catalog.paginate.current = num;
-	catalog.paginate.html = getPaginateHtml(catalog.paginate.count, num);
-	showCatalog(catalog);
-}
-
-function addToCart(div) {
-	let id = div.id;
-	if(getProductAvailable(id)) {
-		cart.count++;
-		if(id in cart.list) {
-			cart.list[id].quantity++;
-			cart.total += cart.list[id].price;
-			cart.list[id].total += cart.list[id].price;
-		} else {
-			cart.list[id] = getProduct(id);
-			cart.total += cart.list[id].price;
-		}
-		localStorage.setItem('cart', JSON.stringify(cart));
-		renderCart();
-		showMessage('success', 'cart-arrow-down', 'Товар добавлен в корзину');
-	} else {
-		showMessage('error', 'ban', 'Товара больше нет в наличии');
-	}
-	
-	
-}
-
-function addToWishlist(id) {
 
 
-	showMessage('likes', 'heart', 'Пополнен список желаний');
-}
-
-function addToNotify(id) {
-
-
-	showMessage('warning', 'envelope', 'Сообщим, когда товар появится');
-}
 
 // Заполняет из Local Storage содержимое корзины, списка желаний и уведомлений
 function getFromStorage() {
-	cart = localStorage.cart ? JSON.parse(localStorage.cart) : cart;
-
-	renderCart();
-
+	cart.fromStorage().render();
 }
 
-// Перезаполняет невидимую корзину или видимую при добавлении/удалении товара
-function renderCart() {
-	let cartList = document.getElementById('shopping-cart-list');
-	let render = '';
-	render += '<div class="shopping-cart-list__header space-between">';
-	render += '<div class="shopping-cart-list__title">Корзина</div>';
-	//render += '<div class="shopping-cart-list__min" title="Минимизировать" onclick="scaleCart()">>*<</div>';
-	if(document.getElementById('shopping-cart-list').classList.contains('shopping-cart-list_visible')) {
-		render += '<div class="shopping-cart-list__close" onclick="showCart()">Спрятать >></div></div>';
-	} else {
-		render += '<div class="shopping-cart-list__close" onclick="showCart()"><< Закрепить</div></div>';
-	}
-	
-	
-	render += '<div class="shopping-cart-list__body">';
-	if(cart.count > 0) {
-		for(key in cart.list) {
-			render += '<div class="shopping-cart-list__item row">';
-			render += '<div class="shopping-cart-list__item_name">' + cart.list[key].name + '</div>';
-			render += '<div class="shopping-cart-list__item_quantity">' + cart.list[key].quantity + ' шт';
-			render += '<div class="shopping-cart-list__item_change"><div onclick="cartItemMinus(' + key + ')" title="Уменьшить количество">-</div><div onclick="cartItemPlus(' + key + ')" title="Увеличить количество">+</div></div></div>';
-			render += '<div class="shopping-cart-list__item_price">' + cart.list[key].price + ' грн</div>';
-			render += '<div class="shopping-cart-list__item_total">' + cart.list[key].total + ' грн</div>';
-			render += '<div class="shopping-cart-list__item_delete" onclick="cartItemRemove(' + key + ')" title="Удалить позицию из корзины">Х</div>';
-			render += '</div>';
-		}
-	} else {
-		render += '<div>Товара в корзине нет!<br/>Добавьте товар в корзину.</div>';
-	}
-	render += '</div><div class="shopping-cart-list__footer space-between">';
-	if(cart.count) {
-		render += '<div class="shopping-cart-list__remove" onclick="removeCart()" title="Удалить все товары из корзины">Очистить корзину</div>';
-	}
-	render += 'Итого на сумму ' + cart.total + ' грн</div>';
-
-	cartList.innerHTML = render;
-	if(cart.count) {
-		document.getElementById('shopping-cart').classList.add('color-green');
-		document.getElementById('shopping-cart-count').innerHTML = cart.count;
-	}
-}
 
 // Принимает id товара и возвращает объект типа {Название, цена, количество, сумма}
 function getProduct(id) {
@@ -406,7 +415,7 @@ function getProduct(id) {
 
 // Возращает индекс товара в массиве данных
 function getProductIndex(id) {
-	console.log(id);
+	//console.log(id);
 	for(let i = 0; i < data.length; i++) {
 		if(data[i].id == id) {
 			return i;
@@ -415,20 +424,6 @@ function getProductIndex(id) {
 	return -1;
 }
 
-function removeCart() {
-	cart = cart = {
-		list: {},
-		count: 0,
-		total: 0,
-	};
-	localStorage.setItem('cart', JSON.stringify(cart));
-	document.getElementById('shopping-cart').classList.remove('color-green');
-	document.getElementById('shopping-cart-count').innerHTML = '';
-	renderCart();
-	document.getElementById('shopping-cart-list').classList.remove('shopping-cart-list_visible');
-	showMessage('warning', 'exclamation', 'Корзина очищена');
-	
-}
 
 function showMessage(cl, type, text) {
 	let div = document.createElement('div');
@@ -443,46 +438,7 @@ function showMessage(cl, type, text) {
 	
 }
 
-function cartItemRemove(div) {
-	if(confirm('Удалить позицию из корзины?')) {
-		let id = div.id;
-		cart.total -= cart.list[id].total;
-		cart.count -= cart.list[id].quantity;
-		delete cart.list[id];
-		localStorage.setItem('cart', JSON.stringify(cart));
-		renderCart();
-	}
-	if(cart.total == 0) {
-		removeCart();
-	}
-}
-function cartItemPlus(div) {
-	let id = div.id;
-	if(getProductAvailable(id)) {
-		cart.list[id].quantity++;
-		cart.list[id].total += cart.list[id].price;
-		cart.count++;
-		cart.total += cart.list[id].price;
-	} else {
-		showMessage('error', 'ban', 'Товара больше нет в наличии');
-	}
-	localStorage.setItem('cart', JSON.stringify(cart));
-	renderCart();
-}
-function cartItemMinus(div) {
-	let id = div.id;
-	if(cart.list[id].quantity == 1) {
-		cartItemRemove(div);
-		return;
-	}
-	cart.list[id].quantity--;
-	cart.list[id].total -= cart.list[id].price;
-	cart.total -= cart.list[id].price;
-	cart.count--;
-	localStorage.setItem('cart', JSON.stringify(cart));
-	renderCart();
-}
-
+// Проверяет доступность товара для размещения в корзину при ограниченном количестве наличия товара
 function getProductAvailable(id) {
 	let key = getProductIndex(id);
 	if(key > -1) {
