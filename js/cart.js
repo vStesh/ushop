@@ -2,6 +2,8 @@ class Cart {
 	list = {};// Список товара
 	count = 0;// Количество товара
 	total = 0;// Сумма товара
+	hash = 'fsdjfkjflksjdflkj65644kj45jl456j4l564jl';
+	
 
 	// Выводит содержимое корзины 
 	render() {
@@ -60,7 +62,9 @@ class Cart {
 
 	// Добавляет товар в корзину
 	add(id) {
+		console.log(this);
 		this.count++;
+		console.log(this);
 		if(id in this.list) {
 			this.list[id].quantity++;
 			this.total += this.list[id].price;
@@ -142,7 +146,8 @@ class Cart {
 
 	// Заполнеят корзину содержимым из LocalStorage
 	fromStorage() {
-		if(localStorage.cart) {
+		if(localStorage.cart && JSON.parse(localStorage.cart).hash == this.hash) {
+			//alert('!!');
 			this.list = JSON.parse(localStorage.cart).list;
 			this.count = JSON.parse(localStorage.cart).count
 			this.total = JSON.parse(localStorage.cart).total

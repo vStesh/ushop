@@ -3,6 +3,7 @@ let main = document.getElementById('main');
 let catalog = new Catalog(data);
 let siteUrl = 'home';
 let cart = new Cart;
+console.log(cart);
 let notify = [];
 let wishlist = [];
 
@@ -16,7 +17,7 @@ document.getElementById('menu-contacts').addEventListener('click', () => {eShowC
 
 eShowHomePage();
 getFromStorage();
-
+console.log(cart);
 /*
 * Обработка событий Функции eFunctionName
 * Начало
