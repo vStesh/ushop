@@ -15,26 +15,31 @@ class Filters {
 	update(form) {
 		//console.log(form);
 		this.reset();
-		for(let key in form) {
-			if(key.substr(0, 6) === 'brand-') {
-				if(form[key].checked) {
-					this.brand.push(key.substr(6));
+		
+		for(let i = 0; i < form.length; i++) {
+			if(form[i].name.substr(0, 6) === 'brand-') {
+				//console.log(i);
+				if(form[i].checked) {
+					//console.log(form[i].name);
+					this.brand.push(form[i].name.substr(6));
 				}
-				//alert('Найден бренд');
 			}
-			if(key === 'available') {
-				if(form[key].value === 'all') {
+
+			if(form[i].name === 'available') {
+				if(form[i].value === 'all' && form[i].checked) {
 					this.available = false;
-				} else {
+				} 
+				if(form[i].value === 'aval' && form[i].checked) {
 					this.available = true;
 				}
 			}
-			if(key === 'max-price') {
-				this.price[1] = form[key].value * 1;
+			if(form[i].name === 'max-price') {
+				this.price[1] = form[i].value * 1;
 			}
-			if(key === 'min-price') {
-				this.price[0] = form[key].value * 1;
+			if(form[i].name === 'min-price') {
+				this.price[0] = form[i].value * 1;
 			}
+			//console.log(key);
 		}
 		catalog.getSorting();
 	}	

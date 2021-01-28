@@ -219,7 +219,7 @@ function getSidebar() {
 	
 	render += '<div class="filter__item" id="filter-brand"><div class="filter__item_header">Бренды:</div>';
 	catalog.brands.forEach((item, key, array) => {
-		render += '<div class="row-min space-between filter__line"><label for="av-all">' + item + '</label><input type="checkbox" name="brand-' + item + '" ' + (catalog.filters.brand.includes(item) ? ' checked ' : '') + '></div>'
+		render += '<div class="row-min space-between filter__line"><label for="av-all">' + item + '</label><input type="checkbox" id="' + item + '" name="brand-' + item + '" ' + (catalog.filters.brand.includes(item) ? ' checked ' : '') + '></div>'
 	});
 	render += '</div></form>';
 	if(!catalog.filters.default) {
